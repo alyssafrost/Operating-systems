@@ -14,12 +14,14 @@ int main(void)
 
     char **arr = malloc(sizeof(char *) * N);
 
+    char buffer[BUFFER_SIZE];
     for (i = 0; i < N; i++)
     {
-        char *buffer = malloc(sizeof(char) * BUFFER_SIZE);
         printf("Please enter word %d of array: ", (i + 1));
         scanf("%s", buffer);
-        arr[i] = buffer;
+
+        arr[i] = malloc(sizeof(char *) * (strlen(buffer) + 1));
+        strcpy(arr[i], buffer);
     }
 
     for (i = 0; i < N; i++)
@@ -69,8 +71,8 @@ int old_main(int args, char **argv)
             strcpy(buffer, arr[i]); // Not sure if this is correct usage of strcpy but it is the function you want to use here
         */
     }
-    printf("%s\n", *arr[i]);
-    printf("%s\n", *arr[0]);
+    printf("%s\n", arr[i]);
+    printf("%s\n", arr[0]);
     printf("Given array is: ");
     printf("[");
     for (i = 0; i < N - 1; i++)
