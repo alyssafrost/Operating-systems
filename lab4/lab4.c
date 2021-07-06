@@ -22,8 +22,8 @@ int main(int argc, char *argv[])
         printf("Usage: %s <source_filename> <destination_filename>\n", argv[0]);
         exit(-1);
     }
-    readFileDescriptor = open(argv[1], O_RDONLY);
-    writeFileDescriptor = open(argv[2], O_CREAT | O_WRONLY | O_TRUNC, 0700);
+    readFileDescriptor = open(argv[2], O_RDONLY);
+    writeFileDescriptor = open(argv[1], O_WRONLY | O_APPEND);
     if (readFileDescriptor == -1 || writeFileDescriptor == -1)
     {
         printf("Error with file open\n");
