@@ -34,7 +34,6 @@ To run: ./a.out
 #include <limits.h>
 #include <dirent.h>   //file type and file name , getting members?
 #include <sys/stat.h> //size in bytes, file type
-                      // page 128 for lstat
 
 typedef void printer(char *, struct stat *, struct dirent *, int); //int is for level depth, char * is for the path name
 
@@ -53,9 +52,12 @@ void filename_printer(char *pathname, struct stat *stat, struct dirent *dirent, 
 
 void symlink_name_printer(char *pathname, struct stat *stat, struct dirent *dirent, int depth) //SYMLINK requires magic
 {
-    if (stat->st_mode & S_IFMT == S_IFLNK)
+    if (S_ISLNK(stat->st_mode)) // st_size = /* total size, in bytes */
     {
-        printf("%s", );
+        int string_size = stat->st_size + 1;                             //bytes + null terminator
+        char *string_buff = malloc(string_size);                         //mallocs the string size
+        int symlink_size = readlink(pathname, string_buff, string_size); //uses readlink for symlink
+        free(string_buff);
     }
 }
 
