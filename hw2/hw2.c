@@ -1,8 +1,10 @@
-/* Name: Alyssa Frost
+/*
+Name: Alyssa Frost
 BlazerId: frost7
 Project #: 3
-To compile: gcc hw2.c
-To run: ./a.out
+To compile: make tree
+To run: ./tree
+*/
 
 // Takes the directory name from where to start the file traversal as a cmd line argument and prints the file hierarchy, starting with the given one.
 // IMPLEMENT: If the program is executed with no arguments, it should print the file hierarchy where it is executed. If no directories, in the current one, list the files by line.
@@ -21,9 +23,6 @@ To run: ./a.out
 //                                      "-s" is the file size in bytes, lists all files in the h. with file size greater than or = to the specified value
 //                                      "-f" is the string pattern, lists files whose name or directory contains substring specified in the string pattern option
 // Should support every option "flag" separetely, but also all strung together as in: -S, -s 1024, -f jpg, -S -s 1024, etc.
-//
-
-// make a main function and then add functionality
 
 #include <unistd.h>
 #include <stdio.h>
@@ -57,6 +56,7 @@ void symlink_name_printer(char *pathname, struct stat *stat, struct dirent *dire
         int string_size = stat->st_size + 1;                             //bytes + null terminator
         char *string_buff = malloc(string_size);                         //mallocs the string size
         int symlink_size = readlink(pathname, string_buff, string_size); //uses readlink for symlink
+        printf("%s", string_buff);
         free(string_buff);
     }
 }
@@ -66,10 +66,80 @@ void file_size_printer(char *pathname, struct stat *stat, struct dirent *dirent,
     printf("%d", stat->st_size);
 }
 
-typedef bool filter(char *, struct stat *, struct dirent *);
-// arg for level
-// what current dir so we can open it
-//
+typedef bool filter(char *, struct stat *, struct dirent *, int, char *); // int is minimum file size in bytes, char * x2 is for the substring "-f"
+
+//filter for -s flag
+bool filter_file_size(char *pathname, struct stat *stat, struct dirent *dirent, int min_file_size, char *substring)
+{
+    if (min_file_size <= stat->st_size)
+    {
+        return true;
+    }
+    return false;
+}
+
+bool filter_string_pattern(char *pathname, struct stat *stat, struct dirent *dirent, int min_file_size, char *substring)
+{
+    char *found_substring = strstr(pathname, substring);
+    if (found_substring)
+    {
+        return true;
+    }
+    return false;
+}
+
+// Recursive function for traversing the tree
+
+void tree_traversal(char *current_dir, filter **filter_array, printer **printer_array, int min_file_size, char *substring, int current_depth, int filter_length, int printer_length)
+{
+    DIR *open_dir = opendir(current_dir);
+    struct dirent *dir_entry;
+    char *relative_path = malloc(sizeof *relative_path * PATH_MAX);
+
+    while (dir_entry = readdir(open_dir)) // loop over dir contents
+    {
+        //construct relative path for each thing in the dir
+        strcpy(relative_path, current_dir);
+        strcat(relative_path, "/");
+        strcat(relative_path, dir_entry->d_name);
+        //
+        struct stat stat;
+        lstat(relative_path, &stat);
+
+        bool should_print = true;
+
+        for (int index = 0; index < filter_length; index++)
+        {
+            if (!(*filter_array[index])(relative_path, &stat, dir_entry, min_file_size, substring))
+            {
+                should_print = false;
+                break;
+            }
+        }
+
+        if (should_print)
+        {
+            for (int index = 0; index < printer_length; index++)
+            {
+                (*printer_array[index])(relative_path, &stat, dir_entry, current_depth);
+                printf(" ");
+            }
+
+            printf("\n");
+        }
+
+        //
+
+        if ((S_ISDIR(stat.st_mode) || S_ISLNK(stat.st_mode)) &&
+            (!(strcmp(dir_entry->d_name, ".") == 0)) &&
+            (!(strcmp(dir_entry->d_name, "..") == 0)))
+        {
+            tree_traversal(relative_path, filter_array, printer_array, min_file_size, substring, current_depth + 1, filter_length, printer_length);
+        }
+    }
+    free(relative_path);
+    closedir(open_dir);
+}
 
 int main(int argc, char **argv)
 {
@@ -124,6 +194,13 @@ int main(int argc, char **argv)
     int filter_index = 0; // genuinely populates the array with function pointers
     if (min_file_size > 0)
     {
+        filter_array[filter_index] = filter_file_size;
+        filter_index++;
+    }
+
+    if (substring != NULL)
+    {
+        filter_array[filter_index] = filter_string_pattern;
         filter_index++;
     }
 
@@ -136,32 +213,25 @@ int main(int argc, char **argv)
     printer **printer_array = malloc((sizeof *printer_array) * printer_array_size);
 
     int printer_index = 0;
+
+    printer_array[printer_index] = indentation_printer;
+    printer_index++;
+
+    printer_array[printer_index] = filename_printer;
+    printer_index++;
+
+    printer_array[printer_index] = symlink_name_printer;
+    printer_index++;
+
     if (should_print_file_size) // S flag
     {
+        printer_array[printer_index] = file_size_printer;
         printer_index++;
     }
 
-    // Also, insert the other 3 printers that always are inserted symlink, name, indent
-
-    // one for symlink name(s)
-    // one for normal file name
-    // one for indentation
-    // one for S (size) check
-
     // where we call the recursive directory function
+    tree_traversal(current, filter_array, printer_array, min_file_size, substring, 0, filter_array_size, printer_array_size);
 
     free(filter_array);
     free(printer_array);
 }
-
-// Devise how a directory is going to be listed and the files within it. Start at pathname or some function called for each file or dir
-// S option functionality
-//build a path -> have something for default casing
-// TODO: loop through everything in directory -- OK either current dir or specified dir in arg
-// print maybe the files based on stupif fucking flags -- the things you print depend on the given flag
-// S - size, if no S just name, s filtering based on min size and f for str match
-// edge case : symbolic link would print two names
-//
-// loop thru sub directories (not for f, no looping for f if it matches the string (dirs))
-//
-//
