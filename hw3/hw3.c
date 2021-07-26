@@ -33,10 +33,11 @@ To run: ./tree
 #include <limits.h>
 #include <dirent.h>   //file type and file name , getting members?
 #include <sys/stat.h> //size in bytes, file type
+#include <sys/wait.h>
 
-typedef void printer(char *, struct stat *, struct dirent *, int); //int is for level depth, char * is for the path name
+typedef void printer(char *, struct stat *, struct dirent *, int, char *command); //int is for level depth, char * is for the path name
 
-void indentation_printer(char *pathname, struct stat *stat, struct dirent *dirent, int depth) //pathname needs to be built somewhere else
+void indentation_printer(char *pathname, struct stat *stat, struct dirent *dirent, int depth, char *command) //pathname needs to be built somewhere else
 {
     for (int index = 0; index < depth; index++)
     {
@@ -44,12 +45,12 @@ void indentation_printer(char *pathname, struct stat *stat, struct dirent *diren
     }
 }
 
-void filename_printer(char *pathname, struct stat *stat, struct dirent *dirent, int depth)
+void filename_printer(char *pathname, struct stat *stat, struct dirent *dirent, int depth, char *command)
 {
     printf("%s", dirent->d_name);
 }
 
-void symlink_name_printer(char *pathname, struct stat *stat, struct dirent *dirent, int depth) //SYMLINK requires magic
+void symlink_name_printer(char *pathname, struct stat *stat, struct dirent *dirent, int depth, char *command) //SYMLINK requires magic
 {
     if (S_ISLNK(stat->st_mode)) // st_size = /* total size, in bytes */
     {
@@ -61,9 +62,39 @@ void symlink_name_printer(char *pathname, struct stat *stat, struct dirent *dire
     }
 }
 
-void file_size_printer(char *pathname, struct stat *stat, struct dirent *dirent, int depth)
+void file_size_printer(char *pathname, struct stat *stat, struct dirent *dirent, int depth, char *command)
 {
     printf("%d", stat->st_size);
+}
+
+void command_printer(char *pathname, struct stat *stat, struct dirent *dirent, int depth, char *command)
+{
+    int process_id = fork();
+    if (process_id == 0)
+    {
+        int token_index = 0;
+        char *args[100]; //nullify
+        //populate arg array with tokens, hey get rid of 10 later
+        char *token = strtok(command, " ");
+        while (token != NULL)
+        {
+            args[token_index] = token;
+            token = strtok(NULL, " ");
+            token_index++;
+        };
+        args[token_index] = pathname;
+        args[token_index + 1] = NULL;
+        execvp(args[0], args);
+        // this is the child, execute
+    }
+    else
+    {
+        int status;
+        waitpid(0, &status, 0);
+    }
+    // this is the parent, go from here should work? proly not
+    //exec
+    // call fork, ;
 }
 
 typedef bool filter(char *, struct stat *, struct dirent *, int, char *); // int is minimum file size in bytes, char * x2 is for the substring "-f"
@@ -90,7 +121,7 @@ bool filter_string_pattern(char *pathname, struct stat *stat, struct dirent *dir
 
 // Recursive function for traversing the tree
 
-void tree_traversal(char *current_dir, filter **filter_array, printer **printer_array, int min_file_size, char *substring, int current_depth, int filter_length, int printer_length)
+void tree_traversal(char *current_dir, filter **filter_array, printer **printer_array, int min_file_size, char *substring, int current_depth, int filter_length, int printer_length, char *command)
 {
     DIR *open_dir = opendir(current_dir);
     struct dirent *dir_entry;
@@ -121,7 +152,7 @@ void tree_traversal(char *current_dir, filter **filter_array, printer **printer_
         {
             for (int index = 0; index < printer_length; index++)
             {
-                (*printer_array[index])(relative_path, &stat, dir_entry, current_depth);
+                (*printer_array[index])(relative_path, &stat, dir_entry, current_depth, command);
                 printf(" ");
             }
 
@@ -134,7 +165,7 @@ void tree_traversal(char *current_dir, filter **filter_array, printer **printer_
             (!(strcmp(dir_entry->d_name, ".") == 0)) &&
             (!(strcmp(dir_entry->d_name, "..") == 0)))
         {
-            tree_traversal(relative_path, filter_array, printer_array, min_file_size, substring, current_depth + 1, filter_length, printer_length);
+            tree_traversal(relative_path, filter_array, printer_array, min_file_size, substring, current_depth + 1, filter_length, printer_length, command);
         }
     }
     free(relative_path);
@@ -149,11 +180,13 @@ int main(int argc, char **argv)
     bool should_print_file_size = 0;
     int min_file_size = 0; // use optarg str-atoi-int
     char *substring = NULL;
+    char *command = NULL;
+    // pointer for unix command
     int c;
 
     opterr = 0;
 
-    while ((c = getopt(argc, argv, "Ss:f:")) != -1)
+    while ((c = getopt(argc, argv, "Ss:f:e:")) != -1)
     {
         switch (c)
         {
@@ -166,8 +199,12 @@ int main(int argc, char **argv)
         case 'f':
             substring = optarg;
             break;
+        case 'e':
+            command = optarg;
+            break;
+            // unix command in " " - executed for each file-- fork/exe/wait
         default:
-            printf("Please only use S, s, or f arguments.");
+            printf("Please only use S, s, f, or e arguments.");
             return -1;
         }
     }
@@ -204,7 +241,7 @@ int main(int argc, char **argv)
         filter_index++;
     }
 
-    int printer_array_size = 3; // Possibility of three "printers" with addition arg S (4)
+    int printer_array_size = 4; // Possibility of four "printers" with addition arg S (4)
     if (should_print_file_size)
     {
         printer_array_size++;
@@ -223,6 +260,9 @@ int main(int argc, char **argv)
     printer_array[printer_index] = symlink_name_printer;
     printer_index++;
 
+    printer_array[printer_index] = command_printer;
+    printer_index++;
+
     if (should_print_file_size) // S flag
     {
         printer_array[printer_index] = file_size_printer;
@@ -230,7 +270,7 @@ int main(int argc, char **argv)
     }
 
     // where we call the recursive directory function
-    tree_traversal(current, filter_array, printer_array, min_file_size, substring, 0, filter_array_size, printer_array_size);
+    tree_traversal(current, filter_array, printer_array, min_file_size, substring, 0, filter_array_size, printer_array_size, command);
 
     free(filter_array);
     free(printer_array);
