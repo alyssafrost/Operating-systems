@@ -40,20 +40,26 @@ void REPL()
     {
         printf("Enter a command> ");
         char *command = NULL;
-        size_t size = 0;
+        size_t size;
         getline(&command, &size, stdin);
+        command[strlen(command) - 1] = '\0'; //null byte char
+
         int token_index = 0;
-        char *args[100];
+        char **args = malloc(sizeof(char *) * 100);
 
         char *token = strtok(command, " ");
 
         while (token != NULL)
         {
-            args[token_index] = token;
+            if (token != NULL)
+            {
+                args[token_index] = strdup(token);
+            }
             token = strtok(NULL, " ");
             token_index++;
         }
         args[token_index] = NULL;
+
         if (strcmp(args[0], "submit") == 0)
         {
             job *j = init_job(&args[1], job_id);
@@ -61,9 +67,14 @@ void REPL()
             printf("\nJob %d was added to the queue.\n", job_id);
             job_id++;
         }
-        else if ("showjobs")
+        else if (strcmp(args[0], "showjobs") == 0)
         {
-            // display_job
+            printf("JobID\t Command\t Status\n");
+            queue_display(job_queue);
+        }
+        else
+        {
+            printf("Invalid command: '%s'\n", args[0]);
         }
     }
 }

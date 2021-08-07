@@ -17,7 +17,14 @@ job *init_job(char **command, int job_id)
 
 void display_job(job *j)
 {
-    printf("%d\t%s\t%s", j->job_id, j->command, j->status);
+    int i = 0; //test 1 if sucks
+    printf("%d\t", j->job_id);
+    while (j->command[i] != NULL)
+    {
+        printf("%s ", j->command[i]);
+        i++;
+    }
+    printf("\t%s\n", j->status);
 }
 
 void run_job(job *j)
