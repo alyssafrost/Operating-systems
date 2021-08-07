@@ -39,11 +39,14 @@ void REPL()
     while (true)
     {
         printf("Enter a command> ");
-        char command[100];
-        scanf("%99s", &command); // Don't read anything extra!
+        char *command = NULL;
+        size_t size = 0;
+        getline(&command, &size, stdin);
         int token_index = 0;
         char *args[100];
+
         char *token = strtok(command, " ");
+
         while (token != NULL)
         {
             args[token_index] = token;
@@ -60,6 +63,7 @@ void REPL()
         }
         else if ("showjobs")
         {
+            // display_job
         }
     }
 }
@@ -78,8 +82,4 @@ int main(int argc, char **argv)
     return 0;
 }
 
-// TODO: Implement a queue that we can add our jobs to, to be threaded to our "execution"
-
-// TODO: Implement a "submit" job -- or an executable being run, such as "hw3.c" is an executable"
-
-// TODO: Implement a "show jobs" option that allows you to print and list out all jobs both running, and waiting
+// https://www.geeksforgeeks.org/multithreading-c-2/
