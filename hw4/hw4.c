@@ -9,8 +9,8 @@ BlazerId(s):
 ---
 Project #: 4
 ---
-To compile: 
-To run: 
+To compile: gcc -lpthread hw4.c job.c queue.c
+To run: ./a.out <number> i.e., "./a.out 1" 
 */
 
 #include <stdio.h>
