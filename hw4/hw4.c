@@ -36,6 +36,7 @@ void *run_job_thread(void *vargp)
         if (j->job_id == -1)
         {
             sleep(1);
+            free(j);
             continue;
         }
         run_job(j);
