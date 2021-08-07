@@ -32,18 +32,19 @@ void *run_job_thread(void *vargp)
 {
     while (true)
     {
-        job j = queue_delete(job_queue);
-        if (j.job_id == -1)
+        job *j = queue_delete(job_queue);
+        if (j->job_id == -1)
         {
             sleep(1);
             continue;
         }
-        run_job(&j);
+        run_job(j);
     }
 }
 
 void REPL()
 {
+
     int job_id = 0;
     while (true)
     {

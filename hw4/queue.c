@@ -41,17 +41,17 @@ int queue_insert(queue *q, job item)
 /* delete an item from the queue, update the pointers and count, and 
    return the item deleted (-1 if queue is null or empty) */
 
-job queue_delete(queue *q)
+job *queue_delete(queue *q)
 {
 	pthread_mutex_lock(&mutex);
 	if ((q == NULL) || (q->count == 0))
 	{
 		printf("Queue count: %d\n", q->count);
 		pthread_mutex_unlock(&mutex);
-		return *init_job(NULL, -1);
+		return init_job(NULL, -1);
 	}
 
-	job j = q->buffer[q->start];
+	job *j = &q->buffer[q->start];
 	q->start = (q->start + 1) % q->size;
 	q->count--;
 
