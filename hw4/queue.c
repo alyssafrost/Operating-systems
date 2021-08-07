@@ -46,7 +46,6 @@ job *queue_delete(queue *q)
 	pthread_mutex_lock(&mutex);
 	if ((q == NULL) || (q->count == 0))
 	{
-		printf("Queue count: %d\n", q->count);
 		pthread_mutex_unlock(&mutex);
 		return init_job(NULL, -1);
 	}
@@ -66,7 +65,6 @@ void queue_display(queue *q) // displays QUEUED jobs
 	int i;
 	if (q != NULL && q->count != 0)
 	{
-		printf("Queue count: %d\n", q->count);
 		for (i = 0; i < q->count; i++)
 			display_job(&q->buffer[(q->start + i) % q->size]);
 	}

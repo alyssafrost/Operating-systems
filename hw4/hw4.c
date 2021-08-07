@@ -27,6 +27,10 @@ Objective:
 To implement a simple job scheduler that executes non-interactive jobs 
 (e.g., jobs that do not have direct user interaction,jobs that can run in the background).
 */
+
+job ran_jobs[1000];
+int count = 0;
+
 queue *job_queue;
 void *run_job_thread(void *vargp)
 {
@@ -39,7 +43,11 @@ void *run_job_thread(void *vargp)
             free(j);
             continue;
         }
+        j->status = "Running";
+        ran_jobs[j->job_id] = *j;
+        count++;
         run_job(j);
+        ran_jobs[j->job_id].status = "Done";
     }
 }
 
@@ -82,6 +90,12 @@ void REPL()
         {
             printf("JobID\t Command\t Status\n");
             queue_display(job_queue);
+            // iterate over ranjobs
+            int i;
+            for (i = 0; i < count; i++)
+            {
+                display_job(&ran_jobs[i]);
+            }
         }
         else
         {

@@ -22,7 +22,7 @@ job *init_job(char **command, int job_id)
 
 void display_job(job *j)
 {
-    int i = 0; //test 1 if sucks
+    int i = 0;
     printf("%d\t", j->job_id);
     while (j->command[i] != NULL)
     {
@@ -65,6 +65,7 @@ void run_job(job *j)
 
         close(fdout);
         close(fderr);
+        exit(0); // never forget.
     }
     else
     {
