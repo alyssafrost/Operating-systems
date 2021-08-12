@@ -67,7 +67,7 @@ int main(int argc, char *args[]) {
   char line[1024];
   int i, count;
 
-  FILE *fptr = fopen("mylist.csv", "r");
+  FILE *fptr = fopen("listings.csv", "r");
   if (fptr == NULL) {
     printf("Error reading input file listings.csv\n");
     exit(-1);
@@ -83,14 +83,12 @@ int main(int argc, char *args[]) {
     qsort(list_items, count, sizeof(struct listing), compare_name);
   }
 
-  for (i = 0; i < count; i++)
     writeToFile("Sorted names.txt", count, list_items);
   printf("\n\n");
   for (i = 0; i < count; i++) {
     qsort(list_items, count, sizeof(struct listing), compare_price);
   }
-  
-  for (i = 0; i < count; i++)
+
     writeToFile("Sorted price.txt", count, list_items);
 
   printf("\n\nSorting and writing to file was successful!\n\n");
