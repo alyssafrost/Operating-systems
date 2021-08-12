@@ -28,14 +28,7 @@ struct listing getfields(char *line) {
   return item;
 }
 
-/*
-temp tester to print to terminal
-delete this and use writeToFile version for submission
-*/
-void displayStruct(struct listing item) {
-  printf("Host Name : %s\n", item.host_name);
-  printf("Price : %f\n", item.price);
-}
+
 void writeToFile(char *file_name, int count, struct listing arr[22555]) {
   int i;
   FILE *f = fopen(file_name, "w");
