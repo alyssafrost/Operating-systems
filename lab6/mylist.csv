@@ -1,0 +1,11 @@
+id,host_id,host_name,neighbourhood_group,neighbourhood,latitude,longitude,room_type,price,minimum_nights,number_of_reviews,calculated_host_listings_count,availability_365
+6,6666,d,Grp Six,Nei Six,666.111,666.222,Entire home/apt,600,62,60,46,206
+7,7777,h,Grp Seven,Nei Seven,777.111,777.222,Entire home/apt,700,72,70,47,207
+8,8888,c,Grp Eight,Nei Eight,888.111,888.222,Private room,800,82,80,48,208
+9,9999,e,Grp Nine,Nei Nine,999.111,999.222,Entire home/apt,900,92,90,49,209
+10,1010,j,Grp Ten,Nei Ten,101.101,101.202,Private room,1000,102,100,40,210
+1,1111,g,Grp One,Nei One,111.111,111.222,Entire home/apt,100,12,10,41,201
+2,2222,b,Grp Two,Nei Two,222.111,222.222,Private room,200,22,20,42,202
+3,3333,i,Grp Three,Nei Three,333.111,333.222,Entire home/apt,300,32,30,43,203
+4,4444,a,Grp Four,Nei Four,444.111,444.222,Private room,400,42,40,44,204
+5,5555,f,Grp Five,Nei Five,555.111,555.222,Private room,500,52,50,45,205
