@@ -100,7 +100,7 @@ int main(int argc, char *args[]) {
   for (i = 0; i < count; i++)
     writeToFile("Sorted price.txt", count, list_items);
 
-  printf("\n\nComplete!\n\n");
+  printf("\n\nSorting and writing to file was successful!\n\n");
 
   return 0;
 }
