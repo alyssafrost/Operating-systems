@@ -1,11 +1,9 @@
 /*
-Name(s): 
+Name: 
 - Alyssa Frost
-- Mallory Merkel
 ---
-BlazerId(s): 
+BlazerId: 
 - frost7
-- mmerkel
 ---
 Project #: 4
 ---
