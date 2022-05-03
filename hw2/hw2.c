@@ -18,8 +18,9 @@ To run: ./tree
                     file 1
                     file 2
 */
-// TODO: If a file is a symobolic link, make sure to display the name and in parenthesis the file name the link points to.
-// TODO: Make it support the following: "-S" lists all files in the hierarchy and prints the file size next to the file name in parenthesis
+// If a file is a symobolic link, make sure to display the name and in parenthesis the file name the link points to.
+// Make it support the following: 
+//                                      "-S" lists all files in the hierarchy and prints the file size next to the file name in parenthesis
 //                                      "-s" is the file size in bytes, lists all files in the h. with file size greater than or = to the specified value
 //                                      "-f" is the string pattern, lists files whose name or directory contains substring specified in the string pattern option
 // Should support every option "flag" separetely, but also all strung together as in: -S, -s 1024, -f jpg, -S -s 1024, etc.
